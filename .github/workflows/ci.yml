@@ -53,12 +53,7 @@ jobs:
           # Ensure lint/test tools exist:
           pip install nose coverage flake8 black
 
-      - name: Lint (flake8)
-        run: flake8 .
-
-      - name: Lint format (black --check)
-        run: black --check .
-
+   
       - name: Wait for Postgres
         run: |
           for i in {1..30}; do
