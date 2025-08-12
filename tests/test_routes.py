@@ -71,7 +71,7 @@ class TestAccountService(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def _create_accounts(self, count):
-        """Factory method to create accounts in bulk"""
+        """Factory method to create accounts in bulk 1"""
         accounts = []
         for _ in range(count):
             account = AccountFactory()
