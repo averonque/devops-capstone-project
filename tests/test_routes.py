@@ -12,12 +12,15 @@ from tests.factories import AccountFactory
 from service.common import status  # HTTP Status Codes
 from service.models import db, Account, init_db
 from service.routes import app
+from service import talisman
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
 )
 
 BASE_URL = "/accounts"
+HTTPS_ENVIRON = {'wsgi.url_scheme': 'https'}
 
 
 ######################################################################
@@ -34,6 +37,7 @@ class TestAccountService(TestCase):
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
         init_db(app)
+       # talisman.force_https = False
 
     @classmethod
     def tearDownClass(cls):
@@ -117,7 +121,7 @@ class TestAccountService(TestCase):
         """It should get 200_OK from the Home Page"""
         response = self.client.get("/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
+    
     def test_health(self):
         """It should be healthy"""
         resp = self.client.get("/health")
@@ -163,3 +167,37 @@ class TestAccountService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     # ADD YOUR TEST CASES HERE ...
+    from service.common import status  # likely already imported
+    def test_cors_security(self):
+        """It should return a CORS header"""
+        resp = self.client.get("/", environ_overrides=HTTPS_ENVIRON)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        # Check for the CORS header
+        self.assertEqual(resp.headers.get("Access-Control-Allow-Origin"), "*")
+
+    def test_security_headers_on_root(self):
+        """It should include standard security headers on the root endpoint over HTTPS"""
+        # Call the root path using HTTPS via environ_overrides
+        resp = self.client.get("/", environ_overrides=HTTPS_ENVIRON)
+
+        # Root should be reachable (usually 200)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # Fetch headers (case-insensitive mapping)
+        headers = resp.headers
+
+        # Assert required security headers and exact values
+        self.assertIn("X-Frame-Options", headers)
+        self.assertEqual(headers["X-Frame-Options"], "SAMEORIGIN")
+
+        self.assertIn("X-Content-Type-Options", headers)
+        self.assertEqual(headers["X-Content-Type-Options"], "nosniff")
+
+        self.assertIn("Content-Security-Policy", headers)
+        self.assertEqual(
+            headers["Content-Security-Policy"],
+            "default-src 'self'; object-src 'none'"
+        )
+
+        self.assertIn("Referrer-Policy", headers)
+        self.assertEqual(headers["Referrer-Policy"], "strict-origin-when-cross-origin")
