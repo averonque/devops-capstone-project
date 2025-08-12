@@ -80,7 +80,7 @@ class TestAccountService(TestCase):
         self.assertGreaterEqual(len(data), 2)
 
     def _create_accounts(self, count):
-        """Factory method to create accounts in bulk"""
+        """Factory method to create accounts in bulk 1"""
         accounts = []
         for _ in range(count):
             account = AccountFactory()
