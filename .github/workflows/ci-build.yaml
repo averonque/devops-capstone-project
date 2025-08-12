@@ -1,4 +1,5 @@
 name: CI Build
+
 on:
   push:
     branches: [ main ]
@@ -10,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     container: python:3.9-slim
 
+    # Optional DB service (matches the lab). Remove this block if you haven't added services yet.
     services:
       postgres:
         image: postgres:alpine
@@ -26,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
