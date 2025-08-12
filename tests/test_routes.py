@@ -37,7 +37,7 @@ class TestAccountService(TestCase):
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
         init_db(app)
-        talisman.force_https = False
+       # talisman.force_https = False
 
     @classmethod
     def tearDownClass(cls):
@@ -159,6 +159,12 @@ class TestAccountService(TestCase):
 
     # ADD YOUR TEST CASES HERE ...
     from service.common import status  # likely already imported
+    def test_cors_security(self):
+        """It should return a CORS header"""
+        resp = self.client.get("/", environ_overrides=HTTPS_ENVIRON)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        # Check for the CORS header
+        self.assertEqual(resp.headers.get("Access-Control-Allow-Origin"), "*")
 
     def test_security_headers_on_root(self):
         """It should include standard security headers on the root endpoint over HTTPS"""
