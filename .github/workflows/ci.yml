@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: accounts
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      # Adjust these to whatever your app expects
+      DATABASE_URI: postgresql://postgres:postgres@localhost:5432/accounts
+      FLASK_ENV: testing
+      PYTHONWARNINGS: ignore::DeprecationWarning
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install system deps (if needed for psycopg2)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpq-dev python3-dev
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || true
+          # If you have a dev reqs file, include it:
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          # Ensure lint/test tools exist:
+          pip install nose coverage flake8 black
+
+      - name: Lint (flake8)
+        run: flake8 .
+
+      - name: Lint format (black --check)
+        run: black --check .
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U postgres && break
+            sleep 2
+          done
+
+      - name: App DB init (optional)
+        run: |
+          # If your app has a CLI to create tables, call it here.
+          # For example (adjust to your project):
+          flask db-create || true
+
+      - name: Run tests (nose + coverage)
+        run: nosetests
