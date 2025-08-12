@@ -53,6 +53,22 @@ class TestAccountService(TestCase):
     ######################################################################
     #  H E L P E R   M E T H O D S
     ######################################################################
+    def test_get_account(self):
+        """It should Read a single Account"""
+        # Create one account (either via helper or POST)
+        # If your class has helper:
+        account = self._create_accounts(1)[0]
+
+        resp = self.client.get(f"{BASE_URL}/{account.id}",
+                            content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data["name"], account.name)
+
+    def test_get_account_not_found(self):
+        """It should not Read an Account that is not found"""
+        resp = self.client.get(f"{BASE_URL}/0")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def _create_accounts(self, count):
         """Factory method to create accounts in bulk"""

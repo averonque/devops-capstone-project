@@ -19,6 +19,25 @@ def health():
     return jsonify(dict(status="OK")), status.HTTP_200_OK
 
 
+
+from flask import jsonify, request, abort
+from service.models import Account
+from service.common import status
+
+######################################################################
+# READ AN ACCOUNT
+######################################################################
+@app.route("/accounts/<int:account_id>", methods=["GET"])
+def get_account(account_id):
+    """Reads an Account by ID"""
+    app.logger.info("Request to read Account %s", account_id)
+    account = Account.find(account_id)
+    if not account:
+        abort(status.HTTP_404_NOT_FOUND,
+              f"Account with id [{account_id}] could not be found.")
+    return account.serialize(), status.HTTP_200_OK
+
+
 ######################################################################
 # GET INDEX
 ######################################################################
