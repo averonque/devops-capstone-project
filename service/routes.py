@@ -37,6 +37,16 @@ def get_account(account_id):
               f"Account with id [{account_id}] could not be found.")
     return account.serialize(), status.HTTP_200_OK
 
+######################################################################
+# LIST ACCOUNTS
+######################################################################
+@app.route("/accounts", methods=["GET"])
+def list_accounts():
+    """Lists all Accounts"""
+    app.logger.info("Request to list Accounts")
+    accounts = [a.serialize() for a in Account.all()]
+    return jsonify(accounts), status.HTTP_200_OK
+
 
 ######################################################################
 # GET INDEX
