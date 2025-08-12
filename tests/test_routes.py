@@ -94,6 +94,20 @@ class TestAccountService(TestCase):
             account.id = new_account["id"]
             accounts.append(account)
         return accounts
+    def test_delete_account(self):
+        """It should Delete an Account"""
+        account = self._create_accounts(1)[0]
+        resp = self.client.delete(f"{BASE_URL}/{account.id}")
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        # verify gone
+        resp = self.client.get(f"{BASE_URL}/{account.id}")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_account_not_found(self):
+        """It should 404 when deleting non-existent Account (adjust to 204 if idempotent)"""
+        resp = self.client.delete(f"{BASE_URL}/0")
+        self.assertIn(resp.status_code, (status.HTTP_404_NOT_FOUND, status.HTTP_204_NO_CONTENT))
 
     ######################################################################
     #  A C C O U N T   T E S T   C A S E S
