@@ -6,9 +6,7 @@
 
 This repository contains the starter code for the project in [**IBM-CD0285EN-SkillsNetwork DevOps Capstone Project**](https://www.coursera.org/learn/devops-capstone-project?specialization=devops-and-software-engineering) which is part of the [**IBM DevOps and Software Engineering Professional Certificate**](https://www.coursera.org/professional-certificates/devops-and-software-engineering)
 
-![CI](https://github.com/averonque/devops-capstone-project/actions/workflows/ci.yml/badge.svg)
-
-
+[![CI Build](https://github.com/averonque/devops-capstone-project/actions/workflows/ci-build.yaml/badge.svg)](https://github.com/averonque/devops-capstone-project/actions/workflows/ci-build.yaml)
 ![Build Status](https://github.com/averonque/devops-capstone-project/actions/workflows/ci-build.yaml/badge.svg)
 
 
